@@ -35,7 +35,6 @@ namespace game
     {
     public:
         virtual ~OnTriggerInterface() = default;
-        virtual void OnTrigger(core::Entity entity1, core::Entity entity2) = 0;
     };
 
     class BodyManager : public core::ComponentManager<Body, static_cast<core::EntityMask>(core::ComponentType::BODY2D)>
@@ -64,6 +63,7 @@ namespace game
 
         void RegisterTriggerListener(OnTriggerInterface& collisionInterface);
         void CopyAllComponents(const PhysicsManager& physicsManager);
+
     private:
         core::EntityManager& entityManager_;
         BodyManager bodyManager_;
