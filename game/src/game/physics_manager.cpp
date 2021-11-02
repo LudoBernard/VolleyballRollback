@@ -125,8 +125,8 @@ namespace game
 
                if(BodyIntersect(body1, body2))
                {
-                   ResolveBodyIntersect(body1, body2);/*
-                   onTriggerAction_.Execute(entity, otherEntity);*/
+                   ResolveBodyIntersect(body1, body2);
+                   onTriggerAction_.Execute(entity, otherEntity);
                }
                    
 

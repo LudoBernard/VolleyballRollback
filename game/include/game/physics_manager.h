@@ -29,7 +29,7 @@ namespace game
         core::degree_t angularVelocity = core::degree_t(0.0f);
         core::degree_t rotation = core::degree_t(0.0f);
         BodyType bodyType = BodyType::DYNAMIC;
-        float bounciness = 0.f;
+        float bounciness = 0.0f;
         float radius = 0.15f;
 		bool isTrigger = false;
     };

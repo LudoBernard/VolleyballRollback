@@ -15,7 +15,9 @@ namespace game
         {
             if (entityManager_.HasComponent(entity, static_cast<core::EntityMask>(ComponentType::BALL)))
             {
+            	
                 auto& ball = components_[entity];
+                
             }
         }
     }

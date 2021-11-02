@@ -157,6 +157,7 @@ namespace game
         }
         //We use the current game state as the temporary new validate game state
         currentPhysicsManager_.CopyAllComponents(lastValidatePhysicsManager_);
+        currentBallManager_.CopyAllComponents(lastValidateBallManager_.GetAllComponents());
         currentPlayerManager_.CopyAllComponents(lastValidatePlayerManager_.GetAllComponents());
 
         //We simulate the frames until the new validated frame
@@ -174,6 +175,7 @@ namespace game
             }
             //We simulate one frame
             currentPlayerManager_.FixedUpdate(sf::seconds(GameManager::FixedPeriod));
+            currentBallManager_.FixedUpdate(sf::seconds(GameManager::FixedPeriod));
             currentPhysicsManager_.FixedUpdate(sf::seconds(GameManager::FixedPeriod));
         }
         //Definitely remove DESTROY entities
@@ -185,6 +187,7 @@ namespace game
             }
         }
         //Copy back the new validate game state to the last validated game state
+        lastValidateBallManager_.CopyAllComponents(currentBallManager_.GetAllComponents());
         lastValidatePlayerManager_.CopyAllComponents(currentPlayerManager_.GetAllComponents());
         lastValidatePhysicsManager_.CopyAllComponents(currentPhysicsManager_);
         lastValidateFrame_ = newValidateFrame;
@@ -298,12 +301,22 @@ namespace game
         CircleBody ballBody;
         ballBody.position = position;
         ballBody.velocity = velocity;
+
+        Ball ball;
         
 
         currentPhysicsManager_.AddBody(entity);
         currentPhysicsManager_.SetBody(entity, ballBody);
         currentPhysicsManager_.AddCircle(entity);
         currentPhysicsManager_.SetCircle(entity, ballBody);
+
+        lastValidateBallManager_.AddComponent(entity);
+        lastValidateBallManager_.SetComponent(entity, ball);
+
+        lastValidatePhysicsManager_.AddBody(entity);
+        lastValidatePhysicsManager_.SetBody(entity, ballBody);
+        lastValidatePhysicsManager_.AddCircle(entity);
+        lastValidatePhysicsManager_.SetCircle(entity, ballBody);
 
         currentTransformManager_.AddComponent(entity);
         currentTransformManager_.SetPosition(entity, position);

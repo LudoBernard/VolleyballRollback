@@ -30,14 +30,15 @@ namespace game
             const bool left = input & PlayerInputEnum::PlayerInput::LEFT;
             const bool jump = input & PlayerInputEnum::PlayerInput::JUMP;
 
-        	/*if(jump)
-        	{
-                core::LogDebug(fmt::format("Jump"));
-        	}*/
+        	
 
-            sf::Vector2<float> dir = {playerSpeed, 0.0f};/*
-            sf::Vector2<float> dirJump = { 0.0f, -playerSpeed*2};*/
+            sf::Vector2<float> dir = {playerSpeed, 0.0f};
 
+            if (jump && playerBody.velocity.y == 0)
+            {
+                playerBody.velocity.y += playerSpeed;
+            }
+        	
             const auto acceleration = ((left ? -1.0f : 0.0f) + (right ? 1.0f : 0.0f)) * dir;
             /*const auto jumping = ((jump ? 1.0f : 0.0f)) * dirJump;*/
             playerBody.velocity += acceleration * dt.asSeconds();
