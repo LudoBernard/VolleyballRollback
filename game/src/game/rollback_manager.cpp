@@ -12,7 +12,8 @@ namespace game
         currentTransformManager_(entityManager),
         currentPhysicsManager_(entityManager), currentPlayerManager_(entityManager, currentPhysicsManager_, gameManager_),
         lastValidatePhysicsManager_(entityManager),
-        lastValidatePlayerManager_(entityManager, lastValidatePhysicsManager_, gameManager_)
+        lastValidatePlayerManager_(entityManager, lastValidatePhysicsManager_, gameManager_),
+		currentBallManager_(entityManager, gameManager), lastValidateBallManager_(entityManager, gameManager)
     {
         for (auto& input : inputs_)
         {
@@ -241,10 +242,8 @@ namespace game
 
     void RollbackManager::SpawnPlayer(PlayerNumber playerNumber, core::Entity entity, core::Vec2f position)
     {
-        Body playerBody;
+        CircleBody playerBody;
         playerBody.position = position;
-        Box playerBox;
-        playerBox.extends = core::Vec2f::one() * 0.5f;
 
         PlayerCharacter playerCharacter;
         playerCharacter.playerNumber = playerNumber;
@@ -254,16 +253,17 @@ namespace game
 
         currentPhysicsManager_.AddBody(entity);
         currentPhysicsManager_.SetBody(entity, playerBody);
-        currentPhysicsManager_.AddBox(entity);
-        currentPhysicsManager_.SetBox(entity, playerBox);
+        currentPhysicsManager_.AddCircle(entity);
+        currentPhysicsManager_.SetCircle(entity, playerBody);
+    	
 
         lastValidatePlayerManager_.AddComponent(entity);
         lastValidatePlayerManager_.SetComponent(entity, playerCharacter);
 
         lastValidatePhysicsManager_.AddBody(entity);
         lastValidatePhysicsManager_.SetBody(entity, playerBody);
-        lastValidatePhysicsManager_.AddBox(entity);
-        lastValidatePhysicsManager_.SetBox(entity, playerBox);
+        lastValidatePhysicsManager_.AddCircle(entity);
+        lastValidatePhysicsManager_.SetCircle(entity, playerBody);
 
         currentTransformManager_.AddComponent(entity);
         currentTransformManager_.SetPosition(entity, position);
@@ -290,5 +290,24 @@ namespace game
             return;
         }
         entityManager_.AddComponent(entity, static_cast<core::EntityMask>(ComponentType::DESTROYED));
+    }
+
+     void RollbackManager::SpawnBall(core::Entity entity, core::Vec2f position, core::Vec2f velocity)
+    {
+
+        CircleBody ballBody;
+        ballBody.position = position;
+        ballBody.velocity = velocity;
+        
+
+        currentPhysicsManager_.AddBody(entity);
+        currentPhysicsManager_.SetBody(entity, ballBody);
+        currentPhysicsManager_.AddCircle(entity);
+        currentPhysicsManager_.SetCircle(entity, ballBody);
+
+        currentTransformManager_.AddComponent(entity);
+        currentTransformManager_.SetPosition(entity, position);
+        currentTransformManager_.SetScale(entity, core::Vec2f::one() * ballScale);
+        currentTransformManager_.SetRotation(entity, core::degree_t(0.0f));
     }
 }

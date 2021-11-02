@@ -1,5 +1,4 @@
 #pragma once
-#include "game_globals.h"
 #include "engine/component.h"
 #include "engine/entity.h"
 #include "maths/angle.h"
@@ -16,19 +15,23 @@ namespace game
         DYNAMIC,
         STATIC
     };
-    struct Body
-    {
-        core::Vec2f position = core::Vec2f::zero();
-        core::Vec2f velocity = core::Vec2f::zero();
-        core::degree_t angularVelocity = core::degree_t(0.0f);
-        core::degree_t rotation = core::degree_t(0.0f);
-        BodyType bodyType = BodyType::DYNAMIC;
-    };
 
     struct Box
     {
         core::Vec2f extends = core::Vec2f::one();
         bool isTrigger = false;
+    };
+
+	struct CircleBody
+	{
+        core::Vec2f position = core::Vec2f::zero();
+        core::Vec2f velocity = core::Vec2f::zero();
+        core::degree_t angularVelocity = core::degree_t(0.0f);
+        core::degree_t rotation = core::degree_t(0.0f);
+        BodyType bodyType = BodyType::DYNAMIC;
+        float bounciness = 0.f;
+        float radius = 0.15f;
+		bool isTrigger = false;
     };
 
     class OnTriggerInterface
@@ -37,7 +40,7 @@ namespace game
         virtual ~OnTriggerInterface() = default;
     };
 
-    class BodyManager : public core::ComponentManager<Body, static_cast<core::EntityMask>(core::ComponentType::BODY2D)>
+    class BodyManager : public core::ComponentManager<CircleBody, static_cast<core::EntityMask>(core::ComponentType::BODY2D)>
     {
     public:
         using ComponentManager::ComponentManager;
@@ -48,18 +51,33 @@ namespace game
         using ComponentManager::ComponentManager;
     };
 
+    class CircleManager : public core::ComponentManager<CircleBody, static_cast<core::EntityMask>(core::ComponentType::CIRCLE_COLLIDER2D)>
+    {
+    public:
+        using ComponentManager::ComponentManager;
+    };
+
     class PhysicsManager
     {
     public:
         explicit PhysicsManager(core::EntityManager& entityManager);
+        bool BodyIntersect(CircleBody body1, CircleBody body2);
+        void ResolveBodyIntersect(CircleBody& body1, CircleBody& body2);
+        core::Vec2f ContactPoint(const CircleBody& body1, const CircleBody& body2) const;
+        core::Vec2f RelocateCenter(const CircleBody& body, const core::Vec2f& v);
+        float CalculateDistance(CircleBody body1, CircleBody body2);
         void FixedUpdate(sf::Time dt);
-        [[nodiscard]] const Body& GetBody(core::Entity entity) const;
-        void SetBody(core::Entity entity, const Body& body);
+        [[nodiscard]] const CircleBody& GetBody(core::Entity entity) const;
+        void SetBody(core::Entity entity, const CircleBody& body);
         void AddBody(core::Entity entity);
 
         void AddBox(core::Entity entity);
         void SetBox(core::Entity entity, const Box& box);
         [[nodiscard]] const Box& GetBox(core::Entity entity) const;
+
+        void AddCircle(core::Entity entity);
+        void SetCircle(core::Entity entity, const CircleBody& circle);
+        [[nodiscard]] const CircleBody& GetCircle(core::Entity entity) const;
 
         void RegisterTriggerListener(OnTriggerInterface& collisionInterface);
         void CopyAllComponents(const PhysicsManager& physicsManager);
@@ -68,6 +86,7 @@ namespace game
         core::EntityManager& entityManager_;
         BodyManager bodyManager_;
         BoxManager boxManager_;
+        CircleManager circleManager_;
         core::Action<core::Entity, core::Entity> onTriggerAction_;
     };
 

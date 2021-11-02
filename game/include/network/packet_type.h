@@ -12,7 +12,7 @@ namespace game
         JOIN = 0u,
         SPAWN_PLAYER,
         INPUT,
-        SPAWN_BULLET,
+        SPAWN_BALL,
         VALIDATE_STATE,
         START_GAME,
         JOIN_ACK,
@@ -115,6 +115,14 @@ namespace game
         PlayerNumber playerNumber = INVALID_PLAYER;
         std::array<std::uint8_t, sizeof(core::Vec2f)> pos{};
         std::array<std::uint8_t, sizeof(core::degree_t)> angle{};
+    };
+
+    struct SpawnBallPacket : TypedPacket<PacketType::SPAWN_BALL>
+    {
+        PlayerNumber playerNumber = INVALID_PLAYER;
+        std::array<std::uint8_t, sizeof(core::Vec2f)> pos{};
+        std::array<std::uint8_t, sizeof(core::degree_t)> angle{};
+    	float bounciness;
     };
 
     inline sf::Packet& operator<<(sf::Packet& packet, const SpawnPlayerPacket& spawnPlayerPacket)

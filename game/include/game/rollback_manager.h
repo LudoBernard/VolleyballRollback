@@ -1,5 +1,5 @@
 #pragma once
-#include "bullet_manager.h"
+#include "ball_manager.h"
 #include "game_globals.h"
 #include "physics_manager.h"
 #include "player_character.h"
@@ -48,6 +48,7 @@ class GameManager;
          * \brief This function does not destroy the entity definitely, but puts the DESTROY flag
          */
         void DestroyEntity(core::Entity entity);
+        void SpawnBall(core::Entity entity, core::Vec2f position, core::Vec2f velocity);
     private:
         PlayerInput GetInputAtFrame(PlayerNumber playerNumber, Frame frame);
         GameManager& gameManager_;
@@ -58,11 +59,14 @@ class GameManager;
         core::TransformManager currentTransformManager_;
         PhysicsManager currentPhysicsManager_;
         PlayerCharacterManager currentPlayerManager_;
+        BallManager currentBallManager_;
         /**
          * Last Validate (confirm frame) Component Managers used for rollback
          */
         PhysicsManager lastValidatePhysicsManager_;
         PlayerCharacterManager lastValidatePlayerManager_;
+        BallManager lastValidateBallManager_;
+
 
 
         Frame lastValidateFrame_ = 0; //Confirm frame

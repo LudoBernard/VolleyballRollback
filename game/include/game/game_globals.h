@@ -15,24 +15,25 @@ namespace game
     const PlayerNumber INVALID_PLAYER = std::numeric_limits<PlayerNumber>::max();
     using ClientId = std::uint16_t;
     using Frame = std::uint32_t;
+    const float ballScale = 0.5f;
 
     const std::uint32_t maxPlayerNmb = 2;
-    const float playerSpeed = 100.0f;
+    const float playerSpeed = 10.0f;
 
     const std::array<sf::Color, std::max(maxPlayerNmb, 4u)> playerColors =
     {
       {
             sf::Color::Cyan,
             sf::Color::Magenta,
-            sf::Color::Yellow,
+            sf::Color::White,
             sf::Color::Green
         }
     };
 
     constexpr std::array<core::Vec2f, std::max(4u, maxPlayerNmb)> spawnPositions
     {
-            core::Vec2f(0,1),
-            core::Vec2f(0,-1),
+            core::Vec2f(-1,-1),
+            core::Vec2f(1,-1),
             core::Vec2f(1,0),
             core::Vec2f(-1,0),
     };
@@ -40,8 +41,7 @@ namespace game
     enum class ComponentType : core::EntityMask
     {
         PLAYER_CHARACTER = static_cast<core::EntityMask>(core::ComponentType::OTHER_TYPE),
-        /*BULLET = static_cast<core::EntityMask>(core::ComponentType::OTHER_TYPE) << 1u,
-        ASTEROID = static_cast<core::EntityMask>(core::ComponentType::OTHER_TYPE) << 2u,*/
+        BALL = static_cast<core::EntityMask>(core::ComponentType::OTHER_TYPE) << 1u,
         PLAYER_INPUT = static_cast<core::EntityMask>(core::ComponentType::OTHER_TYPE) << 3u,
         DESTROYED = static_cast<core::EntityMask>(core::ComponentType::OTHER_TYPE) << 4u,
     };
@@ -53,9 +53,9 @@ namespace game
         enum PlayerInput : std::uint8_t
         {
             NONE = 0u,
-            JUMP = 1u << 0u,
             LEFT = 1u << 2u,
             RIGHT = 1u << 3u,
+            JUMP = 1u << 4u,
         };
     }
 }

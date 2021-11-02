@@ -26,6 +26,7 @@ namespace game
 
         transformManager_.AddComponent(entity);
         transformManager_.SetPosition(entity, position);
+
         rollbackManager_.SpawnPlayer(playerNumber, entity, position);
     }
 
@@ -52,7 +53,17 @@ namespace game
         rollbackManager_.ValidateFrame(newValidateFrame);
     }
 
+    core::Entity GameManager::SpawnBall(PlayerNumber playerNumber, core::Vec2f position, core::Vec2f velocity)
+    {
+        const core::Entity entity = entityManager_.CreateEntity();
 
+        transformManager_.AddComponent(entity);
+        transformManager_.SetPosition(entity, position);
+        transformManager_.SetScale(entity, core::Vec2f::one() * ballScale);
+        rollbackManager_.SpawnBall(entity, position, velocity);
+        return entity;
+    }
+	
     PlayerNumber GameManager::CheckWinner() const
     {
         int alivePlayer = 0;
@@ -87,8 +98,12 @@ namespace game
         {
             core::LogError("Could not load ship sprite");
         }
+        if (!ballTexture_.loadFromFile("data/sprites/masterball.png"))
+        {
+            core::LogError("Could not load ball sprite");
+        }
         //load fonts
-        if (!font_.loadFromFile("data/fonts/8-bit-hud.ttf"))
+        if (!font_.loadFromFile("data/fonts/PixelSplitter-Bold.ttf"))
         {
             core::LogError("Could not load font");
         }
@@ -158,7 +173,7 @@ namespace game
                 const std::string winnerText = fmt::format("You won!");
                 textRenderer_.setFillColor(sf::Color::White);
                 textRenderer_.setString(winnerText);
-                textRenderer_.setCharacterSize(32);
+                textRenderer_.setCharacterSize(50);
                 const auto textBounds = textRenderer_.getLocalBounds();
                 textRenderer_.setPosition(windowSize_.x / 2.0f - textBounds.width/2.0f, 
                     windowSize_.y / 2.0f - textBounds.height / 2.0f);
@@ -169,7 +184,7 @@ namespace game
                 const std::string winnerText = fmt::format("P{} won!", winner_ + 1);
                 textRenderer_.setFillColor(sf::Color::White);
                 textRenderer_.setString(winnerText);
-                textRenderer_.setCharacterSize(32);
+                textRenderer_.setCharacterSize(50);
                 const auto textBounds = textRenderer_.getLocalBounds();
                 textRenderer_.setPosition(windowSize_.x / 2.0f - textBounds.width / 2.0f,
                     windowSize_.y / 2.0f - textBounds.height / 2.0f);
@@ -180,7 +195,7 @@ namespace game
                 const std::string errorMessage = fmt::format("Error with other players");
                 textRenderer_.setFillColor(sf::Color::Red);
                 textRenderer_.setString(errorMessage);
-                textRenderer_.setCharacterSize(32);
+                textRenderer_.setCharacterSize(50);
                 const auto textBounds = textRenderer_.getLocalBounds();
                 textRenderer_.setPosition(windowSize_.x / 2.0f - textBounds.width / 2.0f,
                     windowSize_.y / 2.0f - textBounds.height / 2.0f);
@@ -200,7 +215,7 @@ namespace game
                     const std::string countDownText = fmt::format("Starts in {}", ((startingTime_ - ms) / 1000 + 1));
                     textRenderer_.setFillColor(sf::Color::White);
                     textRenderer_.setString(countDownText);
-                    textRenderer_.setCharacterSize(32);
+                    textRenderer_.setCharacterSize(50);
                     const auto textBounds = textRenderer_.getLocalBounds();
                     textRenderer_.setPosition(windowSize_.x / 2.0f - textBounds.width / 2.0f,
                         windowSize_.y / 2.0f - textBounds.height / 2.0f);
@@ -240,6 +255,7 @@ namespace game
 
         GameManager::SpawnPlayer(playerNumber, position);
         const auto entity = GetEntityFromPlayerNumber(playerNumber);
+    	
         spriteManager_.AddComponent(entity);
         spriteManager_.SetTexture(entity, shipTexture_);
         spriteManager_.SetOrigin(entity, sf::Vector2f(shipTexture_.getSize())/2.0f);
@@ -247,6 +263,20 @@ namespace game
         sprite.setColor(playerColors[playerNumber]);
         spriteManager_.SetComponent(entity, sprite);
     }
+
+    core::Entity ClientGameManager::SpawnBall(PlayerNumber playerNumber, core::Vec2f position, core::Vec2f velocity)
+    {
+        const auto entity = GameManager::SpawnBall(playerNumber, position, velocity);
+
+        spriteManager_.AddComponent(entity);
+        spriteManager_.SetTexture(entity, ballTexture_);
+        spriteManager_.SetOrigin(entity, sf::Vector2f(ballTexture_.getSize()) / 2.0f);
+        auto sprite = spriteManager_.GetComponent(entity);
+        sprite.setColor(playerColors[playerNumber]);
+        spriteManager_.SetComponent(entity, sprite);
+        return entity;
+    }
+
 
 
     void ClientGameManager::FixedUpdate()
@@ -340,20 +370,20 @@ namespace game
     {
         if (newValidateFrame < rollbackManager_.GetLastValidateFrame())
         {
-            //core::LogDebug(fmt::format("[Warning] New validate frame is too old"));
+            core::LogDebug(fmt::format("[Warning] New validate frame is too old"));
             return;
         }
         for (PlayerNumber playerNumber = 0; playerNumber < maxPlayerNmb; playerNumber++)
         {
             if (rollbackManager_.GetLastReceivedFrame(playerNumber) < newValidateFrame)
             {
-                /*
+                
                 core::LogDebug(fmt::format("[Warning] Trying to validate frame {} while playerNumber {} is at input frame {}, client player {}",
                     newValidateFrame,
                     playerNumber + 1,
                     rollbackManager_.GetLastReceivedFrame(playerNumber),
                     GetPlayerNumber()+1));
-                */
+                
                 return;
             }
         }
@@ -375,38 +405,5 @@ namespace game
         }
 
         cameraView_ = originalView_;
-        const sf::Vector2f extends{ cameraView_.getSize() / 2.0f / PixelPerUnit };
-        float currentZoom = 1.0f;
-        constexpr float margin = 1.0f;
-        for (PlayerNumber playerNumber = 0; playerNumber < maxPlayerNmb; playerNumber++)
-        {
-            const auto playerEntity = GetEntityFromPlayerNumber(playerNumber);
-            if(playerEntity == core::EntityManager::INVALID_ENTITY)
-            {
-                continue;
-            }
-            if(entityManager_.HasComponent(playerEntity, static_cast<core::EntityMask>(core::ComponentType::POSITION)))
-            {
-                const auto position = transformManager_.GetPosition(playerEntity);
-                if((std::abs(position.x) + margin) > extends.x)
-                {
-                    const auto ratio = (std::abs(position.x ) + margin) / extends.x;
-                    if(ratio > currentZoom)
-                    {
-                        currentZoom = ratio;
-                    }
-                }
-                if ((std::abs(position.y) + margin) > extends.y)
-                {
-                    const auto ratio = (std::abs(position.y) + margin) / extends.y;
-                    if (ratio > currentZoom)
-                    {
-                        currentZoom = ratio;
-                    }
-                }
-            }
-        }
-        cameraView_.zoom(currentZoom);
-
     }
 }

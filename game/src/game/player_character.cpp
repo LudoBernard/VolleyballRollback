@@ -1,5 +1,7 @@
 #include <game/player_character.h>
 #include <game/game_manager.h>
+#include <fmt/format.h>
+#include <utils/log.h>
 
 namespace game
 {
@@ -22,16 +24,32 @@ namespace game
             auto playerBody = physicsManager_.GetBody(playerEntity);
             auto playerCharacter = GetComponent(playerEntity);
             const auto input = playerCharacter.input;
+            const int velocityMax = 2;
 
             const bool right = input & PlayerInputEnum::PlayerInput::RIGHT;
             const bool left = input & PlayerInputEnum::PlayerInput::LEFT;
             const bool jump = input & PlayerInputEnum::PlayerInput::JUMP;
 
-            sf::Vector2<float> dir = {playerSpeed, 0.0f};
+        	/*if(jump)
+        	{
+                core::LogDebug(fmt::format("Jump"));
+        	}*/
+
+            sf::Vector2<float> dir = {playerSpeed, 0.0f};/*
+            sf::Vector2<float> dirJump = { 0.0f, -playerSpeed*2};*/
 
             const auto acceleration = ((left ? -1.0f : 0.0f) + (right ? 1.0f : 0.0f)) * dir;
-            playerBody.velocity = acceleration * dt.asSeconds();
-
+            /*const auto jumping = ((jump ? 1.0f : 0.0f)) * dirJump;*/
+            playerBody.velocity += acceleration * dt.asSeconds();
+        	if(playerBody.velocity.x >= velocityMax)
+        	{
+                playerBody.velocity.x = velocityMax;
+        	}
+        	if(playerBody.velocity.x <= -velocityMax)
+        	{
+                playerBody.velocity.x = -velocityMax;
+        	}
+           
             physicsManager_.SetBody(playerEntity, playerBody);
 
         }
