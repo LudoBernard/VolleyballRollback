@@ -3,8 +3,8 @@
 
 namespace game
 {
-    BallManager::BallManager(core::EntityManager& entityManager, GameManager& gameManager):
-	ComponentManager(entityManager), gameManager_(gameManager)
+    BallManager::BallManager(core::EntityManager& entityManager, GameManager& gameManager, PhysicsManager& physicsManager):
+	ComponentManager(entityManager), gameManager_(gameManager), physicsManager_(physicsManager)
     {
     }
 
@@ -16,8 +16,6 @@ namespace game
             if (entityManager_.HasComponent(entity, static_cast<core::EntityMask>(ComponentType::BALL)))
             {
             	
-                auto& ball = components_[entity];
-                
             }
         }
     }

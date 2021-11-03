@@ -3,6 +3,8 @@
 #include <fmt/format.h>
 #include <utils/log.h>
 
+#include "maths/basic.h"
+
 namespace game
 {
     PlayerCharacterManager::PlayerCharacterManager(core::EntityManager& entityManager, PhysicsManager& physicsManager, GameManager& gameManager) :
@@ -21,10 +23,10 @@ namespace game
             if (!entityManager_.HasComponent(playerEntity,
                                                    static_cast<core::EntityMask>(ComponentType::PLAYER_CHARACTER)))
                 continue;
-            auto playerBody = physicsManager_.GetBody(playerEntity);
+            auto playerBody = physicsManager_.GetCircle(playerEntity);
             auto playerCharacter = GetComponent(playerEntity);
             const auto input = playerCharacter.input;
-            const int velocityMax = 2;
+            const int velocityMax = 2.5f;
 
             const bool right = input & PlayerInputEnum::PlayerInput::RIGHT;
             const bool left = input & PlayerInputEnum::PlayerInput::LEFT;
@@ -34,14 +36,13 @@ namespace game
 
             sf::Vector2<float> dir = {playerSpeed, 0.0f};
 
-            if (jump && playerBody.velocity.y == 0)
+            if (jump && core::Equal(playerBody.velocity.y, 0.0f))
             {
                 playerBody.velocity.y += playerSpeed;
             }
         	
-            const auto acceleration = ((left ? -1.0f : 0.0f) + (right ? 1.0f : 0.0f)) * dir;
-            /*const auto jumping = ((jump ? 1.0f : 0.0f)) * dirJump;*/
-            playerBody.velocity += acceleration * dt.asSeconds();
+            const auto newVelocity = ((left ? -1.0f : 0.0f) + (right ? 1.0f : 0.0f)) * dir;
+            playerBody.velocity.x = newVelocity.x;
         	if(playerBody.velocity.x >= velocityMax)
         	{
                 playerBody.velocity.x = velocityMax;
@@ -51,7 +52,7 @@ namespace game
                 playerBody.velocity.x = -velocityMax;
         	}
            
-            physicsManager_.SetBody(playerEntity, playerBody);
+            physicsManager_.SetCircle(playerEntity, playerBody);
 
         }
     }

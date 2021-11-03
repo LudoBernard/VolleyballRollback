@@ -76,7 +76,7 @@ namespace game
         void FixedUpdate();
         void SetPlayerInput(PlayerNumber playerNumber, std::uint8_t playerInput, std::uint32_t inputFrame) override;
         void DrawImGui() override;
-        void ConfirmValidateFrame(Frame newValidateFrame, const std::array<PhysicsState, maxPlayerNmb>& physicsStates);
+        void ConfirmValidateFrame(Frame newValidateFrame, const std::array<PhysicsState, maxPlayerNmb>& physicsStates, PhysicsState physicsBallState);
         [[nodiscard]] PlayerNumber GetPlayerNumber() const { return clientPlayer_; }
         void WinGame(PlayerNumber winner) override;
         [[nodiscard]] std::uint32_t GetState() const { return state_; }

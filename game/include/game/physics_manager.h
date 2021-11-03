@@ -16,12 +16,6 @@ namespace game
         STATIC
     };
 
-    struct Box
-    {
-        core::Vec2f extends = core::Vec2f::one();
-        bool isTrigger = false;
-    };
-
 	struct CircleBody
 	{
         core::Vec2f position = core::Vec2f::zero();
@@ -29,7 +23,7 @@ namespace game
         core::degree_t angularVelocity = core::degree_t(0.0f);
         core::degree_t rotation = core::degree_t(0.0f);
         BodyType bodyType = BodyType::DYNAMIC;
-        float bounciness = 0.0f;
+        float bounciness = 0.f;
         float radius = 0.15f;
 		bool isTrigger = false;
     };
@@ -40,18 +34,8 @@ namespace game
         virtual ~OnTriggerInterface() = default;
     };
 
-    class BodyManager : public core::ComponentManager<CircleBody, static_cast<core::EntityMask>(core::ComponentType::BODY2D)>
-    {
-    public:
-        using ComponentManager::ComponentManager;
-    };
-    class BoxManager : public core::ComponentManager<Box, static_cast<core::EntityMask>(core::ComponentType::BOX_COLLIDER2D)>
-    {
-    public:
-        using ComponentManager::ComponentManager;
-    };
 
-    class CircleManager : public core::ComponentManager<CircleBody, static_cast<core::EntityMask>(core::ComponentType::CIRCLE_COLLIDER2D)>
+    class CircleManager : public core::ComponentManager<CircleBody, static_cast<core::EntityMask>(core::ComponentType::CIRCLE_BODY2D)>
     {
     public:
         using ComponentManager::ComponentManager;
@@ -67,13 +51,6 @@ namespace game
         core::Vec2f RelocateCenter(const CircleBody& body, const core::Vec2f& v);
         float CalculateDistance(CircleBody body1, CircleBody body2);
         void FixedUpdate(sf::Time dt);
-        [[nodiscard]] const CircleBody& GetBody(core::Entity entity) const;
-        void SetBody(core::Entity entity, const CircleBody& body);
-        void AddBody(core::Entity entity);
-
-        void AddBox(core::Entity entity);
-        void SetBox(core::Entity entity, const Box& box);
-        [[nodiscard]] const Box& GetBox(core::Entity entity) const;
 
         void AddCircle(core::Entity entity);
         void SetCircle(core::Entity entity, const CircleBody& circle);
@@ -84,8 +61,6 @@ namespace game
 
     private:
         core::EntityManager& entityManager_;
-        BodyManager bodyManager_;
-        BoxManager boxManager_;
         CircleManager circleManager_;
         core::Action<core::Entity, core::Entity> onTriggerAction_;
     };

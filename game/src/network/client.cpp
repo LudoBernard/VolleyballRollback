@@ -30,7 +30,7 @@ namespace game
             const auto* startGamePacket = static_cast<const StartGamePacket*>(packet);
             const auto startingTime = core::ConvertFromBinary<unsigned long long>(startGamePacket->startTime);
             gameManager_.StartGame(startingTime);
-            gameManager_.SpawnBall(2, { 0, 0 }, { 0, 0 });
+            gameManager_.SpawnBall(2, { 0.f,0.f }, { 0.f,0.0f });
             break;
         }
         case PacketType::INPUT:
@@ -86,12 +86,19 @@ namespace game
             const auto* validateFramePacket = static_cast<const ValidateFramePacket*>(packet);
             const auto newValidateFrame = core::ConvertFromBinary<Frame>(validateFramePacket->newValidateFrame);
             std::array<PhysicsState, maxPlayerNmb> physicsStates{};
-            for (size_t i = 0; i < validateFramePacket->physicsState.size(); i++)
+            for (size_t i = 0; i < validateFramePacket->physicsPlayerState.size(); i++)
             {
                 auto* statePtr = reinterpret_cast<std::uint8_t*>(physicsStates.data());
-                statePtr[i] = validateFramePacket->physicsState[i];
+                statePtr[i] = validateFramePacket->physicsPlayerState[i];
             }
-            gameManager_.ConfirmValidateFrame(newValidateFrame, physicsStates);
+            PhysicsState physicsBallState;
+            for (size_t i = 0; i < validateFramePacket->physicsBallState.size(); i++)
+            {
+                auto* statePtr = reinterpret_cast<std::uint8_t*>(&physicsBallState);
+                statePtr[i] = validateFramePacket->physicsBallState[i];
+            }
+        	
+            gameManager_.ConfirmValidateFrame(newValidateFrame, physicsStates, physicsBallState);
             //logDebug("Client received validate frame " + std::to_string(newValidateFrame));
             break;
         }
@@ -102,6 +109,7 @@ namespace game
             break;
         }
         case PacketType::SPAWN_BALL:
+            
             break;
         default:;
         }

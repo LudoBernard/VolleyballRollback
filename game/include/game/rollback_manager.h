@@ -36,8 +36,10 @@ class GameManager;
         /**
          * \brief Confirm Frame and Check with Physics State checksum, called by the clients when receiving Confirm Frame packet
          */
-        void ConfirmFrame(Frame newValidatedFrame, const std::array<PhysicsState, maxPlayerNmb>& serverPhysicsState);
+        void ConfirmFrame(Frame newValidatedFrame, const std::array<PhysicsState, maxPlayerNmb>& serverPhysicsState, PhysicsState
+                          serverPhysicsBallState);
         [[nodiscard]] PhysicsState GetValidatePhysicsState(PlayerNumber playerNumber) const;
+        [[nodiscard]] PhysicsState GetValidatePhysicsStateBall() const;
         [[nodiscard]] Frame GetLastValidateFrame() const { return lastValidateFrame_; }
         [[nodiscard]] Frame GetLastReceivedFrame(PlayerNumber playerNumber) const { return lastReceivedFrame_[playerNumber]; }
         [[nodiscard]] Frame GetCurrentFrame() const { return currentFrame_; }
@@ -48,7 +50,7 @@ class GameManager;
          * \brief This function does not destroy the entity definitely, but puts the DESTROY flag
          */
         void DestroyEntity(core::Entity entity);
-        void SpawnBall(core::Entity entity, core::Vec2f position, core::Vec2f velocity);
+        void SpawnBall(PlayerNumber playerNumber, core::Entity entity, core::Vec2f position, core::Vec2f velocity);
     private:
         PlayerInput GetInputAtFrame(PlayerNumber playerNumber, Frame frame);
         GameManager& gameManager_;
@@ -72,6 +74,7 @@ class GameManager;
         Frame lastValidateFrame_ = 0; //Confirm frame
         Frame currentFrame_ = 0;
         Frame testedFrame_ = 0;
+        core::Entity ballEntity_ = core::EntityManager::INVALID_ENTITY;
 
         static constexpr std::size_t windowBufferSize = 5 * 50; // 5 seconds of frame at 50 fps
         std::array<std::uint32_t, maxPlayerNmb> lastReceivedFrame_{};

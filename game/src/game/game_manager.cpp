@@ -1,3 +1,5 @@
+#include <array>
+#include <array>
 #include <game/game_manager.h>
 
 #include "utils/log.h"
@@ -60,7 +62,7 @@ namespace game
         transformManager_.AddComponent(entity);
         transformManager_.SetPosition(entity, position);
         transformManager_.SetScale(entity, core::Vec2f::one() * ballScale);
-        rollbackManager_.SpawnBall(entity, position, velocity);
+        rollbackManager_.SpawnBall(playerNumber, entity, position, velocity);
         return entity;
     }
 	
@@ -366,7 +368,7 @@ namespace game
     }
 
     void ClientGameManager::ConfirmValidateFrame(Frame newValidateFrame,
-        const std::array<PhysicsState, maxPlayerNmb>& physicsStates)
+                                                 const std::array<PhysicsState, maxPlayerNmb>& physicsStates, PhysicsState physicsBallState)
     {
         if (newValidateFrame < rollbackManager_.GetLastValidateFrame())
         {
@@ -387,7 +389,7 @@ namespace game
                 return;
             }
         }
-        rollbackManager_.ConfirmFrame(newValidateFrame, physicsStates);
+        rollbackManager_.ConfirmFrame(newValidateFrame, physicsStates, physicsBallState);
     }
 
     void ClientGameManager::WinGame(PlayerNumber winner)
