@@ -32,7 +32,7 @@ namespace game
             	
                 auto startGamePacket = std::make_unique<StartGamePacket>();
                 startGamePacket->packetType = PacketType::START_GAME;
-                gameManager_.SpawnBall(2, { 0.f,0.f }, { 0.f,0.0f });
+                gameManager_.SpawnBall(3, { 0.f,0.f }, { -2.5f,3.0f });
                 using namespace std::chrono;
                 const auto ms = (duration_cast<duration<unsigned long long, std::milli>>(
                     system_clock::now().time_since_epoch()

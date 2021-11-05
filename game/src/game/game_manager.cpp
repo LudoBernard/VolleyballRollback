@@ -7,6 +7,7 @@
 #include <imgui.h>
 
 #include "utils/conversion.h"
+#include "SFML/Graphics.hpp"
 
 namespace game
 {
@@ -28,6 +29,7 @@ namespace game
 
         transformManager_.AddComponent(entity);
         transformManager_.SetPosition(entity, position);
+        transformManager_.SetScale(entity, core::Vec2f::one() * playerScale);
 
         rollbackManager_.SpawnPlayer(playerNumber, entity, position);
     }
@@ -68,6 +70,7 @@ namespace game
 	
     PlayerNumber GameManager::CheckWinner() const
     {
+        auto winningPoints = 10;
         int alivePlayer = 0;
         PlayerNumber winner = INVALID_PLAYER;
         const auto& playerManager = rollbackManager_.GetPlayerCharacterManager();
@@ -76,6 +79,11 @@ namespace game
             if (!entityManager_.HasComponent(entity, static_cast<core::EntityMask>(ComponentType::PLAYER_CHARACTER)))
                 continue;
             const auto& player = playerManager.GetComponent(entity);
+            if (player.points == winningPoints)
+            {
+                alivePlayer++;
+                winner = player.playerNumber;
+            }
         }
 
         return alivePlayer == 1 ? winner : INVALID_PLAYER;
@@ -96,9 +104,9 @@ namespace game
     void ClientGameManager::Init()
     {
         //load textures
-        if (!shipTexture_.loadFromFile("data/sprites/ship.png"))
+        if (!playerTexture_.loadFromFile("data/sprites/volt.png"))
         {
-            core::LogError("Could not load ship sprite");
+            core::LogError("Could not load player sprite");
         }
         if (!ballTexture_.loadFromFile("data/sprites/masterball.png"))
         {
@@ -166,6 +174,15 @@ namespace game
 
         spriteManager_.Draw(target);
 
+        auto rectLength = 5.f;
+        auto rectHeight = 200.f;
+        auto rectX = 500.f;
+        auto rectY = windowSize_.y - rectHeight;
+        sf::RectangleShape backgroundRect(sf::Vector2f(rectLength, rectHeight));
+        backgroundRect.setPosition(rectX, rectY);
+        backgroundRect.setFillColor(sf::Color::White);
+        target.draw(backgroundRect);
+    	
         // Draw texts on screen
         target.setView(originalView_);
         if (state_ & FINISHED)
@@ -214,7 +231,7 @@ namespace game
                     ).count();
                 if (ms < startingTime_)
                 {
-                    const std::string countDownText = fmt::format("Starts in {}", ((startingTime_ - ms) / 1000 + 1));
+                    const std::string countDownText = fmt::format("Starts in {}\nFirst to 10 points wins!", ((startingTime_ - ms) / 1000 + 1));
                     textRenderer_.setFillColor(sf::Color::White);
                     textRenderer_.setString(countDownText);
                     textRenderer_.setCharacterSize(50);
@@ -227,7 +244,7 @@ namespace game
         }
         else
         {
-            std::string health;
+            std::string points;
             const auto& playerManager = rollbackManager_.GetPlayerCharacterManager();
             for (PlayerNumber playerNumber = 0; playerNumber < maxPlayerNmb; playerNumber++)
             {
@@ -236,11 +253,12 @@ namespace game
                 {
                     continue;
                 }
+                points += fmt::format("P{} points: {} ", playerNumber + 1, playerManager.GetComponent(playerEntity).points);
             }
             textRenderer_.setFillColor(sf::Color::White);
-            textRenderer_.setString(health);
+            textRenderer_.setString(points);
             textRenderer_.setPosition(10, 10);
-            textRenderer_.setCharacterSize(20);
+            textRenderer_.setCharacterSize(32);
             target.draw(textRenderer_);
         }
         
@@ -259,8 +277,8 @@ namespace game
         const auto entity = GetEntityFromPlayerNumber(playerNumber);
     	
         spriteManager_.AddComponent(entity);
-        spriteManager_.SetTexture(entity, shipTexture_);
-        spriteManager_.SetOrigin(entity, sf::Vector2f(shipTexture_.getSize())/2.0f);
+        spriteManager_.SetTexture(entity, playerTexture_);
+        spriteManager_.SetOrigin(entity, sf::Vector2f(playerTexture_.getSize())/2.0f);
         auto sprite = spriteManager_.GetComponent(entity);
         sprite.setColor(playerColors[playerNumber]);
         spriteManager_.SetComponent(entity, sprite);

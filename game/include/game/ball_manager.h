@@ -3,6 +3,7 @@
 
 #include "game_globals.h"
 #include "physics_manager.h"
+#include "player_character.h"
 
 namespace game
 {
@@ -15,10 +16,11 @@ namespace game
     class BallManager : public core::ComponentManager<Ball, static_cast<core::EntityMask>(ComponentType::BALL)>
     {
     public:
-        explicit BallManager(core::EntityManager& entityManager, GameManager& gameManager, PhysicsManager& physicsManager);
+        explicit BallManager(core::EntityManager& entityManager, GameManager& gameManager, PhysicsManager& physicsManager, PlayerCharacterManager& playerCharacterManager);
         void FixedUpdate(sf::Time dt);
     private:
         GameManager& gameManager_;
         PhysicsManager& physicsManager_;
+        PlayerCharacterManager& playerCharacterManager_;
     };
 }

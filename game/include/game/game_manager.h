@@ -94,8 +94,9 @@ namespace game
         unsigned long long startingTime_ = 0;
         std::uint32_t state_ = 0;
 
-        sf::Texture shipTexture_;
+        sf::Texture playerTexture_;
         sf::Texture ballTexture_;
+        sf::Texture backTexture_;
         sf::Font font_;
 
         sf::Text textRenderer_;

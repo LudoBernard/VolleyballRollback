@@ -11,6 +11,7 @@ namespace game
     {
         PlayerInput input = 0u;
         PlayerNumber playerNumber = INVALID_PLAYER;
+        short points = playerPoints;
     };
     class GameManager;
     class PlayerCharacterManager : public core::ComponentManager<PlayerCharacter, core::EntityMask(ComponentType::PLAYER_CHARACTER)>

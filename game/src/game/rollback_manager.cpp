@@ -15,7 +15,7 @@ namespace game
 		currentPhysicsManager_(entityManager), currentPlayerManager_(entityManager, currentPhysicsManager_, gameManager_),
 		lastValidatePhysicsManager_(entityManager),
 		lastValidatePlayerManager_(entityManager, lastValidatePhysicsManager_, gameManager_),
-		currentBallManager_(entityManager, gameManager, currentPhysicsManager_), lastValidateBallManager_(entityManager, gameManager, currentPhysicsManager_)
+		currentBallManager_(entityManager, gameManager, currentPhysicsManager_, currentPlayerManager_), lastValidateBallManager_(entityManager, gameManager, lastValidatePhysicsManager_, lastValidatePlayerManager_)
 	{
 		for (auto& input : inputs_)
 		{
@@ -241,6 +241,21 @@ namespace game
 		{
 			state += velocityPtr[i];
 		}
+
+		//Adding rotation
+		const auto angle = playerBody.rotation.value();
+		const auto* anglePtr = reinterpret_cast<const PhysicsState*>(&angle);
+		for (size_t i = 0; i < sizeof(float) / sizeof(PhysicsState); i++)
+		{
+			state += anglePtr[i];
+		}
+		//Adding angular Velocity
+		const auto angularVelocity = playerBody.angularVelocity.value();
+		const auto* angularVelPtr = reinterpret_cast<const PhysicsState*>(&angularVelocity);
+		for (size_t i = 0; i < sizeof(float) / sizeof(PhysicsState); i++)
+		{
+			state += angularVelPtr[i];
+		}
 		return state;
 	}
 
@@ -268,6 +283,21 @@ namespace game
 		{
 			state += velocityPtr[i];
 		}
+
+		//Adding rotation
+		const auto angle = ballBody.rotation.value();
+		const auto* anglePtr = reinterpret_cast<const PhysicsState*>(&angle);
+		for (size_t i = 0; i < sizeof(float) / sizeof(PhysicsState); i++)
+		{
+			state += anglePtr[i];
+		}
+		//Adding angular Velocity
+		const auto angularVelocity = ballBody.angularVelocity.value();
+		const auto* angularVelPtr = reinterpret_cast<const PhysicsState*>(&angularVelocity);
+		for (size_t i = 0; i < sizeof(float) / sizeof(PhysicsState); i++)
+		{
+			state += angularVelPtr[i];
+		}
 		return state;
 	}
 
@@ -275,6 +305,7 @@ namespace game
 	{
 		CircleBody playerBody;
 		playerBody.position = position;
+		playerBody.radius = 0.20f;
 
 		PlayerCharacter playerCharacter;
 		playerCharacter.playerNumber = playerNumber;
@@ -285,7 +316,6 @@ namespace game
 		currentPhysicsManager_.AddCircle(entity);
 		currentPhysicsManager_.SetCircle(entity, playerBody);
 
-
 		lastValidatePlayerManager_.AddComponent(entity);
 		lastValidatePlayerManager_.SetComponent(entity, playerCharacter);
 
@@ -294,6 +324,7 @@ namespace game
 
 		currentTransformManager_.AddComponent(entity);
 		currentTransformManager_.SetPosition(entity, position);
+		currentTransformManager_.SetScale(entity, core::Vec2f::one() * playerScale);
 	}
 
 	PlayerInput RollbackManager::GetInputAtFrame(PlayerNumber playerNumber, Frame frame)
@@ -325,7 +356,7 @@ namespace game
 		CircleBody ballBody;
 		ballBody.position = position;
 		ballBody.velocity = velocity;
-		ballBody.bounciness = 1.0f;
+		ballBody.bounciness = 0.99f;
 
 		Ball ball;
 
