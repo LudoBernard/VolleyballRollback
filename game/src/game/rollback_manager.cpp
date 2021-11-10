@@ -8,20 +8,20 @@
 
 namespace game
 {
-
 	RollbackManager::RollbackManager(GameManager& gameManager, core::EntityManager& entityManager) :
 		gameManager_(gameManager), entityManager_(entityManager),
 		currentTransformManager_(entityManager),
-		currentPhysicsManager_(entityManager), currentPlayerManager_(entityManager, currentPhysicsManager_, gameManager_),
+		currentPhysicsManager_(entityManager),
+		currentPlayerManager_(entityManager, currentPhysicsManager_, gameManager_),
+		currentBallManager_(entityManager, gameManager, currentPhysicsManager_, currentPlayerManager_),
 		lastValidatePhysicsManager_(entityManager),
 		lastValidatePlayerManager_(entityManager, lastValidatePhysicsManager_, gameManager_),
-		currentBallManager_(entityManager, gameManager, currentPhysicsManager_, currentPlayerManager_), lastValidateBallManager_(entityManager, gameManager, lastValidatePhysicsManager_, lastValidatePlayerManager_)
+		lastValidateBallManager_(entityManager, gameManager, lastValidatePhysicsManager_, lastValidatePlayerManager_)
 	{
 		for (auto& input : inputs_)
 		{
 			std::fill(input.begin(), input.end(), 0u);
 		}
-		currentPhysicsManager_.RegisterTriggerListener(*this);
 	}
 
 	void RollbackManager::SimulateToCurrentFrame()
@@ -64,7 +64,7 @@ namespace game
 					core::LogWarning(fmt::format("Invalid Entity in {}:line {}", __FILE__, __LINE__));
 					continue;
 				}
-				auto playerCharacter = currentPlayerManager_.GetComponent(playerEntity);
+				auto &playerCharacter = currentPlayerManager_.GetComponent(playerEntity);
 				playerCharacter.input = playerInput;
 				currentPlayerManager_.SetComponent(playerEntity, playerCharacter);
 			}
@@ -77,14 +77,15 @@ namespace game
 		for (core::Entity entity = 0; entity < entityManager_.GetEntitiesSize(); entity++)
 		{
 			if (!entityManager_.HasComponent(entity,
-				static_cast<core::EntityMask>(core::ComponentType::CIRCLE_BODY2D) |
-				static_cast<core::EntityMask>(core::ComponentType::TRANSFORM)))
+			                                 static_cast<core::EntityMask>(core::ComponentType::CIRCLE_BODY2D) |
+			                                 static_cast<core::EntityMask>(core::ComponentType::TRANSFORM)))
 				continue;
 			const auto& body = currentPhysicsManager_.GetCircle(entity);
 			currentTransformManager_.SetPosition(entity, body.position);
 			currentTransformManager_.SetRotation(entity, body.rotation);
 		}
 	}
+
 	void RollbackManager::SetPlayerInput(PlayerNumber playerNumber, PlayerInput playerInput, std::uint32_t inputFrame)
 	{
 		//Should only be called on the server
@@ -147,7 +148,6 @@ namespace game
 			{
 				entityManager_.RemoveComponent(entity, static_cast<core::EntityMask>(ComponentType::DESTROYED));
 			}
-
 		}
 		createdEntities_.clear();
 		//We check that we got all the inputs
@@ -173,7 +173,7 @@ namespace game
 			{
 				const auto playerInput = GetInputAtFrame(playerNumber, frame);
 				const auto playerEntity = gameManager_.GetEntityFromPlayerNumber(playerNumber);
-				auto playerCharacter = currentPlayerManager_.GetComponent(playerEntity);
+				auto &playerCharacter = currentPlayerManager_.GetComponent(playerEntity);
 				playerCharacter.input = playerInput;
 				currentPlayerManager_.SetComponent(playerEntity, playerCharacter);
 			}
@@ -198,7 +198,9 @@ namespace game
 		lastValidateFrame_ = newValidateFrame;
 		createdEntities_.clear();
 	}
-	void RollbackManager::ConfirmFrame(Frame newValidateFrame, const std::array<PhysicsState, maxPlayerNmb>& serverPhysicsState, PhysicsState
+
+	void RollbackManager::ConfirmFrame(Frame newValidateFrame,
+	                                   const std::array<PhysicsState, maxPlayerNmb>& serverPhysicsState, PhysicsState
 	                                   serverPhysicsBallState)
 	{
 		ValidateFrame(newValidateFrame);
@@ -211,12 +213,13 @@ namespace game
 			}
 		}
 		const PhysicsState lastPhysicsBallState = GetValidatePhysicsStateBall();
-		
-		if(serverPhysicsBallState != lastPhysicsBallState)
+
+		if (serverPhysicsBallState != lastPhysicsBallState)
 		{
 			assert(false && "Ball physics State are not equal");
 		}
 	}
+
 	PhysicsState RollbackManager::GetValidatePhysicsState(PlayerNumber playerNumber) const
 	{
 		PhysicsState state = 0;
@@ -335,22 +338,22 @@ namespace game
 	}
 
 
-
 	void RollbackManager::DestroyEntity(core::Entity entity)
 	{
 		//we don't need to save a bullet that has been created in the time window
 		if (std::find_if(createdEntities_.begin(), createdEntities_.end(), [entity](auto newEntity)
-			{
-				return newEntity.entity == entity;
-			}) != createdEntities_.end())
+		{
+			return newEntity.entity == entity;
+		}) != createdEntities_.end())
 		{
 			entityManager_.DestroyEntity(entity);
 			return;
 		}
-			entityManager_.AddComponent(entity, static_cast<core::EntityMask>(ComponentType::DESTROYED));
+		entityManager_.AddComponent(entity, static_cast<core::EntityMask>(ComponentType::DESTROYED));
 	}
 
-	void RollbackManager::SpawnBall(PlayerNumber playerNumber, core::Entity entity, core::Vec2f position, core::Vec2f velocity)
+	void RollbackManager::SpawnBall(PlayerNumber playerNumber, core::Entity entity, core::Vec2f position,
+	                                core::Vec2f velocity)
 	{
 		ballEntity_ = entity;
 		CircleBody ballBody;
@@ -358,9 +361,9 @@ namespace game
 		ballBody.velocity = velocity;
 		ballBody.bounciness = 0.99f;
 
-		Ball ball;
+		const Ball ball;
 
-		createdEntities_.push_back({ entity, testedFrame_ });
+		createdEntities_.push_back({entity, testedFrame_});
 
 		currentBallManager_.AddComponent(entity);
 		currentBallManager_.SetComponent(entity, ball);

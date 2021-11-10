@@ -8,7 +8,6 @@
 #include "network/packet_type.h"
 
 
-
 namespace game
 {
 	class GameManager;
@@ -25,7 +24,7 @@ namespace game
 		explicit RollbackManager(GameManager& gameManager, core::EntityManager& entityManager);
 		/**
 		 * \brief Simulate all players with new inputs, method call only by the clients
-		 */
+		 **/
 		void SimulateToCurrentFrame();
 		void SetPlayerInput(PlayerNumber playerNumber, PlayerInput playerInput, Frame inputFrame);
 		void StartNewFrame(Frame newFrame);
@@ -36,12 +35,18 @@ namespace game
 		/**
 		 * \brief Confirm Frame and Check with Physics State checksum, called by the clients when receiving Confirm Frame packet
 		 */
-		void ConfirmFrame(Frame newValidatedFrame, const std::array<PhysicsState, maxPlayerNmb>& serverPhysicsState, PhysicsState
-			serverPhysicsBallState);
+		void ConfirmFrame(Frame newValidatedFrame, const std::array<PhysicsState, maxPlayerNmb>& serverPhysicsState,
+		                  PhysicsState
+		                  serverPhysicsBallState);
 		[[nodiscard]] PhysicsState GetValidatePhysicsState(PlayerNumber playerNumber) const;
 		[[nodiscard]] PhysicsState GetValidatePhysicsStateBall() const;
 		[[nodiscard]] Frame GetLastValidateFrame() const { return lastValidateFrame_; }
-		[[nodiscard]] Frame GetLastReceivedFrame(PlayerNumber playerNumber) const { return lastReceivedFrame_[playerNumber]; }
+
+		[[nodiscard]] Frame GetLastReceivedFrame(PlayerNumber playerNumber) const
+		{
+			return lastReceivedFrame_[playerNumber];
+		}
+
 		[[nodiscard]] Frame GetCurrentFrame() const { return currentFrame_; }
 		[[nodiscard]] const core::TransformManager& GetTransformManager() const { return currentTransformManager_; }
 		[[nodiscard]] const PlayerCharacterManager& GetPlayerCharacterManager() const { return currentPlayerManager_; }
@@ -70,7 +75,6 @@ namespace game
 		BallManager lastValidateBallManager_;
 
 
-
 		Frame lastValidateFrame_ = 0; //Confirm frame
 		Frame currentFrame_ = 0;
 		Frame testedFrame_ = 0;
@@ -82,13 +86,12 @@ namespace game
 		/**
 		 * \brief Array containing all the created entities in the window between the confirm frame and the current frame
 		 * to destroy them when rollbacking.
-		 */
+		 **/
 		std::vector<CreatedEntity> createdEntities_;
 	public:
 		[[nodiscard]] const std::array<PlayerInput, windowBufferSize>& GetInputs(PlayerNumber playerNumber) const
 		{
 			return inputs_[playerNumber];
 		}
-
 	};
 }
