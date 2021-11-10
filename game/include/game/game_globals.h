@@ -15,7 +15,7 @@ namespace game
 	using ClientId = std::uint16_t;
 	using Frame = std::uint32_t;
 	const float ballScale = 0.4f;
-	const float playerScale = 2.f;
+	const float playerScale = 2.7f;
 	const short playerPoints = 0;
 
 	const std::uint32_t maxPlayerNmb = 2;

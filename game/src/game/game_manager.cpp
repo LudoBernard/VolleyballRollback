@@ -70,7 +70,7 @@ namespace game
 	PlayerNumber GameManager::CheckWinner() const
 	{
 		const auto winningPoints = 10;
-		auto alivePlayer = 0;
+		auto winningPlayer = 0;
 		auto winner = INVALID_PLAYER;
 		const auto& playerManager = rollbackManager_.GetPlayerCharacterManager();
 		for (core::Entity entity = 0; entity < entityManager_.GetEntitiesSize(); entity++)
@@ -78,14 +78,14 @@ namespace game
 			if (!entityManager_.HasComponent(entity, static_cast<core::EntityMask>(ComponentType::PLAYER_CHARACTER)))
 				continue;
 			const auto& player = playerManager.GetComponent(entity);
-			if (player.points == winningPoints)
+			if (player.points >= winningPoints)
 			{
-				alivePlayer++;
+				winningPlayer++;
 				winner = player.playerNumber;
 			}
 		}
 
-		return alivePlayer == 1 ? winner : INVALID_PLAYER;
+		return winningPlayer == 1 ? winner : INVALID_PLAYER;
 	}
 
 	void GameManager::WinGame(PlayerNumber winner)
