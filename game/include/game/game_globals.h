@@ -20,6 +20,7 @@ namespace game
 
 	const std::uint32_t maxPlayerNmb = 2;
 	const float playerSpeed = 5.0f;
+	const core::Vec2f gameAreaSize = {10.0f, 10.0f};
 
 	const std::array<sf::Color, std::max(maxPlayerNmb, 4u)> playerColors =
 	{

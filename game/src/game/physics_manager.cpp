@@ -1,4 +1,5 @@
 #include <game/physics_manager.h>
+#include <game/game_globals.h>
 
 namespace game
 {
@@ -66,12 +67,8 @@ namespace game
 			if (!entityManager_.HasComponent(entity, static_cast<core::EntityMask>(core::ComponentType::CIRCLE_BODY2D)))
 				continue;
 			constexpr core::Vec2f G = {0.0f, -9.81f};
-			const core::Vec2f maxPos{
-				(core::windowSize.x / core::pixelPerMeter / 2), (core::windowSize.y / core::pixelPerMeter / 2)
-			};
-			const core::Vec2f minPos{
-				-(core::windowSize.x / core::pixelPerMeter / 2), -(core::windowSize.y / core::pixelPerMeter / 2)
-			};
+			const core::Vec2f maxPos = gameAreaSize / 2;
+			const core::Vec2f minPos = core::Vec2f::zero() - gameAreaSize / 2;
 			auto body = circleManager_.GetComponent(entity);
 			body.position += body.velocity * dt.asSeconds();
 			body.velocity += G * dt.asSeconds();

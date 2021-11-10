@@ -171,7 +171,7 @@ namespace game
 
 		auto rectLength = 5.f;
 		auto rectHeight = 200.f;
-		auto rectX = 500.f;
+		auto rectX = windowSize_.x / 2;
 		auto rectY = windowSize_.y - rectHeight;
 		sf::RectangleShape backgroundRect(sf::Vector2f(rectLength, rectHeight));
 		backgroundRect.setPosition(rectX, rectY);
@@ -226,7 +226,7 @@ namespace game
 				).count();
 				if (ms < startingTime_)
 				{
-					const std::string countDownText = fmt::format("Starts in {}\nFirst to 10 points wins!",
+					const std::string countDownText = fmt::format("\t\t\t\tStarts in {}\nFirst to 10 points wins!",
 					                                              ((startingTime_ - ms) / 1000 + 1));
 					textRenderer_.setFillColor(sf::Color::White);
 					textRenderer_.setString(countDownText);

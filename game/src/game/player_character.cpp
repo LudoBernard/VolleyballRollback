@@ -16,15 +16,11 @@ namespace game
 
 	void PlayerCharacterManager::FixedUpdate(sf::Time dt)
 	{
-		for (core::Entity playerEntity = 0; playerEntity < entityManager_.GetEntitiesSize(); playerEntity++)
+		for (PlayerNumber playerNumber = 0; playerNumber < maxPlayerNmb; playerNumber++)
 		{
-			if (!entityManager_.HasComponent(playerEntity,
-			                                 static_cast<core::EntityMask>(ComponentType::PLAYER_CHARACTER)))
-				continue;
-
-			const core::Vec2f minPos{
-				-(core::windowSize.x / core::pixelPerMeter / 2), -(core::windowSize.y / core::pixelPerMeter / 2)
-			};
+			const auto playerEntity = gameManager_.GetEntityFromPlayerNumber(playerNumber);
+		
+			const core::Vec2f minPos = core::Vec2f::zero() - gameAreaSize / 2;
 			auto playerBody = physicsManager_.GetCircle(playerEntity);
 			const auto playerCharacter = GetComponent(playerEntity);
 			const auto input = playerCharacter.input;
@@ -53,7 +49,16 @@ namespace game
 			{
 				playerBody.velocity.x = -velocityMax;
 			}
+			
+			if(playerBody.position.x - playerBody.radius < 0 && playerBody.velocity.x < 0 && playerNumber == 1)
+			{
+				playerBody.velocity.x = 0;
+			}
 
+			else if (playerBody.position.x + playerBody.radius > 0 && playerBody.velocity.x > 0 && playerNumber == 0)
+			{
+				playerBody.velocity.x = 0;
+			}
 
 			physicsManager_.SetCircle(playerEntity, playerBody);
 		}

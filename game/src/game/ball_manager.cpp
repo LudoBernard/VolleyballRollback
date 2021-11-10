@@ -26,12 +26,8 @@ namespace game
 			{
 				continue;
 			}
-			const core::Vec2f maxPos{
-				(core::windowSize.x / core::pixelPerMeter / 2), (core::windowSize.y / core::pixelPerMeter / 2)
-			};
-			const core::Vec2f minPos{
-				-(core::windowSize.x / core::pixelPerMeter / 2), -(core::windowSize.y / core::pixelPerMeter / 2)
-			};
+			const core::Vec2f maxPos = gameAreaSize / 2;
+			const core::Vec2f minPos = core::Vec2f::zero() - gameAreaSize / 2;
 			const auto& ballBody = physicsManager_.GetCircle(entity);
 			const auto player1 = gameManager_.GetEntityFromPlayerNumber(0);
 			const auto player2 = gameManager_.GetEntityFromPlayerNumber(1);
